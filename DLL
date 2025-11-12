@@ -1,0 +1,100 @@
+Step 1- 
+#include <jni.h>                // Include JNI header file to interface C with Java 
+#include "ArithmeticOperations.h" // Include the auto-generated header file 
+ 
+// Function to perform addition 
+JNIEXPORT jint JNICALL 
+Java_ArithmeticOperations_add(JNIEnv *env, jobject obj, jint a, jint b) { 
+    // Simply return the sum of two integers 
+    return a + b; 
+} 
+ 
+// Function to perform subtraction 
+JNIEXPORT jint JNICALL 
+Java_ArithmeticOperations_subtract(JNIEnv *env, jobject obj, jint a, jint b) { 
+    // Return the result of a - b 
+    return a - b; 
+} 
+ 
+// Function to perform multiplication 
+JNIEXPORT jint JNICALL 
+Java_ArithmeticOperations_multiply(JNIEnv *env, jobject obj, jint a, jint b) { 
+    // Return the product of two integers 
+    return a * b; 
+} 
+ 
+// Function to perform division 
+JNIEXPORT jint JNICALL 
+Java_ArithmeticOperations_divide(JNIEnv *env, jobject obj, jint a, jint b) { 
+    // Prevent division by zero to avoid runtime error 
+    if (b == 0) { 
+        return 0;  // Return 0 or could throw an exception 
+    } 
+ 
+    // Return integer division result 
+    return a / b; 
+} 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Step 2- // Java class that defines native methods for arithmetic operations 
+public class ArithmeticOperations { 
+ 
+    // Declaration of native methods (implemented in C) 
+    public native int add(int a, int b); 
+    public native int subtract(int a, int b); 
+    public native int multiply(int a, int b); 
+    public native int divide(int a, int b); 
+ 
+    // Static block to load the shared C library at runtime 
+    static { 
+        System.loadLibrary("ArithmeticOperations"); // Library name = libArithmeticOperations.so 
+    } 
+ 
+    // Main method to test native functions 
+    public static void main(String[] args) { 
+        // Create an object of this class 
+        ArithmeticOperations ops = new ArithmeticOperations(); 
+ 
+        // Declare sample numbers 
+        int a = 10, b = 5; 
+ 
+        // Call native methods and display results 
+        System.out.println("Addition: " + ops.add(a, b));           // Calls C function 
+Java_ArithmeticOperations_add 
+        System.out.println("Subtraction: " + ops.subtract(a, b));   // Calls C function 
+Java_ArithmeticOperations_subtract 
+        System.out.println("Multiplication: " + ops.multiply(a, b));// Calls C function 
+Java_ArithmeticOperations_multiply 
+        System.out.println("Division: " + ops.divide(a, b));        // Calls C function 
+Java_ArithmeticOperations_divide 
+    } 
+} 
+ 
+Step 3- commands for execution on terminal 
+# Step 1: Compile the Java source file 
+javac ArithmeticOperations.java 
+# Step 2: Generate JNI header file (.h) 
+javac -h . ArithmeticOperations.java 
+# Step 3: Compile the C file and create the shared library (.so) 
+gcc -I /lib/jvm/java-11-openjdk-amd64/include \ -I /lib/jvm/java-11-openjdk-amd64/include/linux \ -shared -o libArithmeticOperations.so ArithmeticOperations.c 
+# Step 4: Run the Java program with the shared library 
+java -Djava.library.path=. ArithmeticOperations 
+Output- 
+Addition: 15 
+Subtraction: 5 
+Multiplication: 50 
+Division: 2
