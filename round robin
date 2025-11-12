@@ -1,0 +1,87 @@
+import java.util.*; 
+ 
+class Process { 
+    int id, at, bt, rt, ct, tat, wt, done; 
+} 
+ 
+public class RRScheduling { 
+    public static void main(String[] args) { 
+        Scanner sc = new Scanner(System.in); 
+        System.out.println("*** Round Robin Scheduling (Preemptive) ***"); 
+        System.out.print("Enter no of processes: "); 
+        int n = sc.nextInt(); 
+ 
+        Process p[] = new Process[n]; 
+        for (int i = 0; i < n; i++) { 
+            p[i] = new Process(); 
+            p[i].id = i + 1; 
+            System.out.print("Enter AT for P" + (i + 1) + ": "); 
+            p[i].at = sc.nextInt(); 
+            System.out.print("Enter BT for P" + (i + 1) + ": "); 
+            p[i].bt = sc.nextInt(); 
+            p[i].rt = p[i].bt;  // remaining time = burst time 
+            p[i].done = 0; 
+        } 
+ 
+        System.out.print("\nEnter Time Quantum: "); 
+        int tq = sc.nextInt(); 
+ 
+        // Sort processes by arrival time 
+        for (int i = 0; i < n - 1; i++) { 
+            for (int j = i + 1; j < n; j++) { 
+                if (p[i].at > p[j].at) { 
+                    Process temp = p[i]; 
+                    p[i] = p[j]; 
+                    p[j] = temp; 
+                } 
+            } 
+        } 
+ 
+        Queue<Integer> q = new LinkedList<>(); 
+        q.add(0); // add first process 
+        int time = p[0].at; 
+        double avgTAT = 0, avgWT = 0; 
+ 
+        while (!q.isEmpty()) { 
+            int i = q.remove(); 
+ 
+            // If process finishes within quantum 
+            if (p[i].rt <= tq) { 
+                time += p[i].rt; 
+                p[i].rt = 0; 
+                p[i].done = 1; 
+                p[i].ct = time; 
+                p[i].tat = p[i].ct - p[i].at; 
+                p[i].wt = p[i].tat - p[i].bt; 
+ 
+                // Add newly arrived processes 
+                for (int j = 0; j < n; j++) { 
+                    if (p[j].at <= time && p[j].done == 0 && !q.contains(j)) 
+                        q.add(j); 
+                } 
+            } 
+            // If process still has time left 
+            else { 
+                time += tq; 
+                p[i].rt -= tq; 
+ 
+                // Add new arrivals 
+                for (int j = 0; j < n; j++) { 
+                    if (p[j].at <= time && p[j].done == 0 && !q.contains(j) && i != j) 
+                        q.add(j); 
+                } 
+                q.add(i); // put same process at end of queue 
+            } 
+        } 
+ 
+        System.out.println("\nP\tAT\tBT\tCT\tTAT\tWT"); 
+        System.out.println("---------------------------------"); 
+        for (int i = 0; i < n; i++) { 
+            System.out.println("P" + p[i].id + "\t" + p[i].at + "\t" + p[i].bt + "\t" + 
+                    p[i].ct + "\t" + p[i].tat + "\t" + p[i].wt); 
+            avgTAT += p[i].tat; 
+            avgWT += p[i].wt; 
+        } 
+ 
+        System.out.println("\nAvg TAT = " + (avgTAT / n)); 
+        System.out.println("Avg WT  = " + (avgWT / n)}}
