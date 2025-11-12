@@ -1,0 +1,74 @@
+import java.util.*;
+
+class Process {
+    int pid, at, bt, pr;
+    int wt = 0, tat = 0, ct = 0;
+
+    Process(int pid, int at, int bt, int pr) {
+        this.pid = pid;
+        this.at = at;
+        this.bt = bt;
+        this.pr = pr;
+    }
+}
+
+public class PriorityNonPreemptive {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.println("*** Priority Scheduling (Non-Preemptive) ***");
+        System.out.print("Enter number of processes: ");
+        int n = sc.nextInt();
+
+        Process[] p = new Process[n];
+        for (int i = 0; i < n; i++) {
+            System.out.print("Enter Arrival Time of P" + (i + 1) + ": ");
+            int at = sc.nextInt();
+            System.out.print("Enter Burst Time of P" + (i + 1) + ": ");
+            int bt = sc.nextInt();
+            System.out.print("Enter Priority of P" + (i + 1) + ": ");
+            int pr = sc.nextInt();
+            p[i] = new Process(i + 1, at, bt, pr);
+        }
+
+        Arrays.sort(p, Comparator.comparingInt(x -> x.at));
+
+        int time = 0, done = 0;
+        double totalWT = 0, totalTAT = 0;
+
+        System.out.println("\nPID\tAT\tBT\tPR\tCT\tTAT\tWT");
+        while (done < n) {
+            Process curr = null;
+
+            for (Process proc : p) {
+                if (proc.at <= time && proc.ct == 0) {
+                    if (curr == null || proc.pr < curr.pr)
+                        curr = proc;
+                }
+            }
+
+            if (curr == null) {
+                time++;
+                continue;
+            }
+
+            curr.ct = time + curr.bt;
+            curr.tat = curr.ct - curr.at;
+            curr.wt = curr.tat - curr.bt;
+
+            totalWT += curr.wt;
+            totalTAT += curr.tat;
+
+            System.out.printf("P%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
+                    curr.pid, curr.at, curr.bt, curr.pr, curr.ct, curr.tat, curr.wt);
+
+            time = curr.ct;
+            done++;
+        }
+
+        System.out.printf("\nAverage Waiting Time: %.2f\n", totalWT / n);
+        System.out.printf("Average Turnaround Time: %.2f\n", totalTAT / n);
+
+        sc.close();
+    }
+}
