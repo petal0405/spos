@@ -1,0 +1,79 @@
+import java.util.*; 
+ 
+public class FIFO { 
+ 
+    public static void main(String[] args) { 
+        Scanner sc = new Scanner(System.in); 
+ 
+        // Step 1: Take input for frame count 
+        System.out.print("Enter number of frames: "); 
+        int frameCount = sc.nextInt(); 
+ 
+        // Step 2: Take input for total pages 
+        System.out.print("Enter number of pages: "); 
+        int pageCount = sc.nextInt(); 
+ 
+        int pages[] = new int[pageCount]; 
+        System.out.println("Enter page reference string:"); 
+        for (int i = 0; i < pageCount; i++) 
+            pages[i] = sc.nextInt(); 
+ 
+        // Step 3: Use Queue to maintain FIFO order and Set for quick lookup 
+        Queue<Integer> frameQueue = new LinkedList<>(); // maintains page order 
+        Set<Integer> frameSet = new HashSet<>();        // for fast hit checking 
+ 
+        int hits = 0, faults = 0; // counters 
+ 
+        // Step 4: Process each page one by one 
+        System.out.println("\n------------------------------------------------"); 
+        System.out.println("Page Replacement Process (FIFO)"); 
+        System.out.println("------------------------------------------------"); 
+ 
+        for (int i = 0; i < pageCount; i++) { 
+            int page = pages[i]; 
+ 
+            // Check if page is already in frame (HIT case) 
+            if (frameSet.contains(page)) { 
+                hits++; 
+                System.out.printf("Step %2d | Page %2d → HIT  | Frames: ", (i + 1), page); 
+            }  
+            else { 
+                // Page not present → PAGE FAULT 
+                faults++; 
+ 
+                // If all frames are full, remove the oldest one (FIFO) 
+                if (frameQueue.size() == frameCount) { 
+                    int removed = frameQueue.poll(); // remove oldest 
+                    frameSet.remove(removed); 
+                } 
+ 
+                // Add the new page 
+                frameQueue.add(page); 
+                frameSet.add(page); 
+ 
+                System.out.printf("Step %2d | Page %2d → FAULT | Frames: ", (i + 1), page); 
+            } 
+ 
+            // Display current frame content 
+            for (int f : frameQueue) 
+                System.out.print(f + " "); 
+            for (int j = frameQueue.size(); j < frameCount; j++) 
+                System.out.print("- "); // show empty slots as '-' 
+ 
+            System.out.println(); 
+        } 
+ 
+        System.out.println("------------------------------------------------"); 
+ 
+        // Step 5: Display summary and ratios 
+        double hitRatio = ((double) hits / pageCount) * 100; 
+        double faultRatio = ((double) faults / pageCount) * 100; 
+ 
+        System.out.println("Total Page Faults : " + faults); 
+        System.out.println("Total Page Hits   : " + hits); 
+        System.out.printf("Hit Ratio  : %.2f%%\n", hitRatio); 
+        System.out.printf("Fault Ratio: %.2f%%\n", faultRatio); 
+ 
+        sc.close(); 
+    } 
+} 
