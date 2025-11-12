@@ -36,20 +36,6 @@ Java_ArithmeticOperations_divide(JNIEnv *env, jobject obj, jint a, jint b) {
 } 
  
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
 Step 2- // Java class that defines native methods for arithmetic operations 
 public class ArithmeticOperations { 
  
