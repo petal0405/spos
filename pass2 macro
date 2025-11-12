@@ -1,0 +1,103 @@
+import java.io.*;
+import java.util.*;
+
+public class MacroProcessor_PassTwo_Simple {
+
+    static Map<String, Integer> MNT = new LinkedHashMap<>();
+    static List<String> MDT = new ArrayList<>();
+    static Map<String, List<String>> ALA = new LinkedHashMap<>();
+    static List<String> actualParams = new ArrayList<>();
+
+    public static void main(String[] args) throws Exception {
+        loadTables();
+        expandMacros();
+    }
+
+    static void loadTables() throws Exception {
+        BufferedReader br;
+        String line;
+
+        br = new BufferedReader(new FileReader("MNT.txt"));
+        while ((line = br.readLine()) != null) {
+            String[] parts = line.trim().split("\\s+");
+            if (parts.length == 2)
+                MNT.put(parts[0], Integer.parseInt(parts[1]));
+        }
+        br.close();
+
+        br = new BufferedReader(new FileReader("MDT.txt"));
+        while ((line = br.readLine()) != null) {
+            MDT.add(line.trim());
+        }
+        br.close();
+
+        br = new BufferedReader(new FileReader("ALA.txt"));
+        String currentMacro = null;
+        List<String> paramList = null;
+
+        while ((line = br.readLine()) != null) {
+            line = line.trim();
+            if (line.isEmpty()) continue;
+
+            if (line.startsWith("Macro:")) {
+                currentMacro = line.substring(line.indexOf(":") + 1).trim();
+                paramList = new ArrayList<>();
+                ALA.put(currentMacro, paramList);
+            } else if (line.contains("->")) {
+                String[] parts = line.split("->");
+                paramList.add(parts[0].trim());
+            }
+        }
+        br.close();
+    }
+
+    static void expandMacros() throws Exception {
+        BufferedReader src = new BufferedReader(new FileReader("source.txt"));
+        PrintWriter out = new PrintWriter(new FileWriter("expanded_code.txt"));
+
+        String line;
+        System.out.println("*** PASS-II OUTPUT ***\n");
+
+        while ((line = src.readLine()) != null) {
+            line = line.trim();
+            if (line.isEmpty()) continue;
+
+            String[] parts = line.split("\\s+|,");
+            String macroName = parts[0];
+
+            if (MNT.containsKey(macroName)) {
+                actualParams.clear();
+                for (int i = 1; i < parts.length; i++)
+                    actualParams.add(parts[i]);
+                expandMacro(macroName, out);
+            } else {
+                System.out.println(line);
+                out.println(line);
+            }
+        }
+
+        src.close();
+        out.close();
+        System.out.println("\nExpanded code saved to 'expanded_code.txt'");
+    }
+
+    static void expandMacro(String macroName, PrintWriter out) {
+        int start = MNT.get(macroName);
+        List<String> formals = ALA.get(macroName);
+
+        for (int i = start + 1; i < MDT.size(); i++) {
+            String line = MDT.get(i);
+            if (line.contains("MEND")) break;
+
+            for (int j = 0; j < formals.size(); j++) {
+                line = line.replace("#" + (j + 1), actualParams.get(j));
+            }
+
+            System.out.println("+" + line);
+            out.println("+" + line);
+        }
+    }
+}
+
+
+      
