@@ -1,0 +1,104 @@
+3. Optimal Page - 
+import java.util.*; 
+ 
+public class Optimal { 
+    public static void main(String[] args) { 
+        Scanner sc = new Scanner(System.in); 
+ 
+        // Step 1: Input number of frames 
+        System.out.print("Enter number of frames: "); 
+        int framesCount = sc.nextInt(); 
+ 
+        // Step 2: Input number of pages in the reference string 
+        System.out.print("Enter number of pages: "); 
+        int pagesCount = sc.nextInt(); 
+ 
+        // Step 3: Input the page reference string 
+        int pages[] = new int[pagesCount]; 
+        System.out.println("Enter page reference string:"); 
+        for (int i = 0; i < pagesCount; i++) { 
+            pages[i] = sc.nextInt(); 
+        } 
+ 
+        // Step 4: Create a list to hold pages currently in memory (frames) 
+        List<Integer> frames = new ArrayList<>(); 
+        int pageFaults = 0; // counter for page faults 
+ 
+        System.out.println("\nPage Replacement Process:"); 
+ 
+        // Step 5: Traverse through each page in the reference string 
+        for (int i = 0; i < pagesCount; i++) { 
+            int page = pages[i]; // current page 
+ 
+            // Step 6: Check if page already exists in the frame (HIT case) 
+            if (frames.contains(page)) { 
+                // No page fault since the page is already loaded 
+                System.out.print("Step " + (i + 1) + " (Page " + page + "): "); 
+                printFrames(frames); 
+                continue; // skip to next page 
+            } 
+ 
+            // Step 7: If page not found → Page Fault occurs 
+            pageFaults++; 
+ 
+            // Step 8: If frame not yet full, simply add the page 
+            if (frames.size() < framesCount) { 
+                frames.add(page); 
+            }  
+            // Step 9: If frame is full, we must replace a page optimally 
+            else { 
+                // Find which page to replace using future knowledge 
+                int indexToReplace = findOptimal(frames, pages, i + 1); 
+                frames.set(indexToReplace, page); // Replace page 
+            } 
+ 
+            // Step 10: Print the current frame content after this step 
+            System.out.print("Step " + (i + 1) + " (Page " + page + "): "); 
+            printFrames(frames); 
+        } 
+ 
+        // Step 11: Print total page faults at the end 
+        System.out.println("\nTotal Page Faults: " + pageFaults); 
+        sc.close(); 
+    } 
+ 
+    // Step 12: Method to find the page that will not be used for the longest time 
+    private static int findOptimal(List<Integer> frames, int[] pages, int start) { 
+        int farthest = start;         // tracks farthest use in future 
+        int indexToReplace = -1;      // index of frame to replace 
+ 
+        // Check every page currently in frame 
+        for (int i = 0; i < frames.size(); i++) { 
+            int page = frames.get(i); 
+            int j; 
+ 
+            // Find next use of this page in the future 
+            for (j = start; j < pages.length; j++) { 
+                if (pages[j] == page) { 
+                    // Page found again later 
+                    if (j > farthest) { 
+                        farthest = j;        // record the farthest position 
+                        indexToReplace = i;  // mark this frame index 
+                    } 
+                    break; 
+                } 
+            } 
+ 
+            // If this page is never used again, replace it immediately 
+            if (j == pages.length) { 
+                return i; 
+            } 
+        } 
+ 
+        // If all pages will be used again, replace the one used farthest in future 
+        return (indexToReplace == -1) ? 0 : indexToReplace; 
+    } 
+ 
+    // Step 13: Method to display current pages in memory 
+    private static void printFrames(List<Integer> frames) { 
+        for (int f : frames) { 
+            System.out.print(f + " "); 
+        } 
+        System.out.println(); 
+    } 
+}
